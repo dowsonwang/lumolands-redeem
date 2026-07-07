@@ -11,7 +11,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
-import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth';
 
 const { Header, Sider, Content } = Layout;
@@ -107,6 +107,29 @@ export default function AdminLayout() {
         <Content style={{ margin: 24, padding: 24, background: '#fff', borderRadius: 8, minHeight: 280 }}>
           <Outlet context={{ hasPermission }} />
         </Content>
+        <Link
+          to="/"
+          style={{
+            position: 'fixed',
+            bottom: 16,
+            left: 16,
+            zIndex: 50,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 14px',
+            borderRadius: 20,
+            background: 'rgba(255,255,255,0.9)',
+            border: '1px solid #e5e5e5',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            fontSize: 13,
+            color: '#595959',
+            backdropFilter: 'blur(4px)',
+          }}
+          title="返回兑换页"
+        >
+          ← 返回兑换页
+        </Link>
       </Layout>
     </Layout>
   );
