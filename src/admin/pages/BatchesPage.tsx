@@ -67,11 +67,11 @@ export default function BatchesPage() {
 
   const handleExport = (batch: Batch) => {
     const codes = allCodes.filter((c) => c.batchId === batch.id);
-    // CSV 加 BOM 头确保 Excel 正确识别中文
+    // CSV 加 BOM 头确保 Excel 正确识别中文；兑换码以 4-4-4-4 格式展示方便阅读
     const csv = ['\uFEFFCode,Status,RedeemedAt,RedeemedEmail']
       .concat(
         codes.map((c) =>
-          [c.id, c.status, c.redeemedAt ?? '', c.redeemedEmail ?? ''].join(','),
+          [formatCode(c.id), c.status, c.redeemedAt ?? '', c.redeemedEmail ?? ''].join(','),
         ),
       )
       .join('\n');
