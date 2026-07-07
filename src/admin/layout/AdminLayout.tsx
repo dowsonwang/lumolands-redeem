@@ -1,11 +1,8 @@
 import { useState } from 'react';
 import { Layout, Menu, Avatar, Dropdown, Tag, Typography } from 'antd';
 import {
-  DashboardOutlined,
   AppstoreOutlined,
   SearchOutlined,
-  ToolOutlined,
-  HistoryOutlined,
   LogoutOutlined,
   UserOutlined,
   MenuFoldOutlined,
@@ -18,11 +15,8 @@ const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
 const menuItems = [
-  { key: '/admin', icon: <DashboardOutlined />, label: '数据看板' },
   { key: '/admin/batches', icon: <AppstoreOutlined />, label: '批次管理' },
   { key: '/admin/codes', icon: <SearchOutlined />, label: '兑换码查询' },
-  { key: '/admin/remedy', icon: <ToolOutlined />, label: '客服补救' },
-  { key: '/admin/logs', icon: <HistoryOutlined />, label: '操作日志' },
 ];
 
 export default function AdminLayout() {
@@ -71,7 +65,7 @@ export default function AdminLayout() {
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[location.pathname === '/admin' ? '/admin/batches' : location.pathname]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
           style={{ borderRight: 0 }}

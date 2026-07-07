@@ -4,7 +4,7 @@
 import type { AdminUser, Batch, Code, RedemptionLog, AdminLog } from './types';
 import { generateCodes } from './codeGenerator';
 
-const DB_KEY = 'lumolands_redeem_db_v1';
+const DB_KEY = 'lumolands_redeem_db_v2';
 
 interface DBShape {
   users: AdminUser[];
@@ -24,7 +24,7 @@ function seedDB(): DBShape {
     { username: 'service', password: 'service', role: 'service', nickname: '客服' },
   ];
 
-  // 种子：1 个已启用的批次 + 几个测试码
+  // 种子：1 个已启用的批次 + 3 个固定测试码（覆盖客服补救全部场景）
   const batch1: Batch = {
     id: 'B20260707001',
     durationMonths: 12,
@@ -35,23 +35,57 @@ function seedDB(): DBShape {
     createdAt: now,
   };
 
-  const existing = new Set<string>();
-  const codeStrings = generateCodes(3, existing);
-  const codes: Code[] = codeStrings.map((c) => ({
-    id: c,
-    batchId: batch1.id,
-    status: 'unused',
-    redeemedAt: null,
-    redeemedEmail: null,
-    redeemedIp: null,
-    createdAt: now,
-  }));
+  // 3 个固定可记忆的 mock 码（仅使用合法字符集，剔除 0O1IL）
+  const codes: Code[] = [
+    {
+      // 场景1：已使用 —— 用户把邮箱拼错了（gmial），用来测「换绑」和「撤销兑换」
+      id: 'REMEDYUSEDAAAAAA',
+      batchId: batch1.id,
+      status: 'used',
+      redeemedAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+      redeemedEmail: 'user@gmial.com',
+      redeemedIp: '203.0.113.42',
+      createdAt: now,
+    },
+    {
+      // 场景2：未使用 —— 可测「该码尚未被兑换」提示
+      id: 'REMEDYNEWAAAAAAA',
+      batchId: batch1.id,
+      status: 'unused',
+      redeemedAt: null,
+      redeemedEmail: null,
+      redeemedIp: null,
+      createdAt: now,
+    },
+    {
+      // 场景3：已作废 —— 可测「该码已被作废」提示
+      id: 'REMEDYVDDAAAAAAA',
+      batchId: batch1.id,
+      status: 'voided',
+      redeemedAt: null,
+      redeemedEmail: null,
+      redeemedIp: null,
+      createdAt: now,
+    },
+  ];
+
+  // 对应的兑换记录（含一次失败的尝试，还原真实客诉排查场景）
+  const redemptionLogs: RedemptionLog[] = [
+    {
+      id: 'log_seed_1',
+      code: 'REMEDYUSEDAAAAAA',
+      email: 'user@gmial.com',
+      result: 'success',
+      ip: '203.0.113.42',
+      createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+    },
+  ];
 
   return {
     users,
     batches: [batch1],
     codes,
-    redemptionLogs: [],
+    redemptionLogs,
     adminLogs: [],
     loginLocks: {},
   };

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   Card, Table, Button, Input, Select, Space, Tag, Modal,
-  Descriptions, message, Popconfirm, Form, Input as AntInput, Typography, Timeline,
+  Descriptions, message, Popconfirm, Typography, Timeline,
 } from 'antd';
-import { SearchOutlined, ReloadOutlined, StopOutlined, PlusOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, StopOutlined } from '@ant-design/icons';
 import { useOutletContext } from 'react-router-dom';
 import { codeDB, batchDB, redemptionLogDB, adminLogDB } from '../db';
 import { formatCode } from '../codeGenerator';
@@ -30,13 +30,24 @@ const resultLabels: Record<string, string> = {
 export default function CodesPage() {
   const { hasPermission } = useOutletContext<{ hasPermission: (a: 'manage' | 'query') => boolean }>();
   const [refresh, setRefresh] = useState(0);
+  // 输入框的临时值
+  const [inputValues, setInputValues] = useState({ code: '', email: '', batchId: '', status: '' });
+  // 点击查询后实际应用的过滤条件
   const [filters, setFilters] = useState({ code: '', email: '', batchId: '', status: '' });
   const [detailCode, setDetailCode] = useState<Code | null>(null);
-  const [supplementOpen, setSupplementOpen] = useState(false);
-  const [supplementForm] = Form.useForm();
 
   const batches = batchDB.list();
   const allCodes = codeDB.list();
+
+  const handleSearch = () => {
+    setFilters({ ...inputValues });
+  };
+
+  const handleReset = () => {
+    const empty = { code: '', email: '', batchId: '', status: '' };
+    setInputValues(empty);
+    setFilters(empty);
+  };
 
   const filtered = allCodes.filter((c) => {
     if (filters.code && !c.id.includes(filters.code.toUpperCase())) return false;
@@ -59,21 +70,6 @@ export default function CodesPage() {
     } else {
       message.error('只有未使用的码才能作废');
     }
-  };
-
-  const handleSupplement = async () => {
-    const values = await supplementForm.validateFields();
-    const newCode = codeDB.supplement({ remark: values.remark });
-    adminLogDB.add({
-      operator: 'admin',
-      action: 'code_supplement',
-      target: newCode.id,
-      detail: values.remark,
-    });
-    message.success(`补发码已生成：${formatCode(newCode.id)}`);
-    setSupplementOpen(false);
-    supplementForm.resetFields();
-    setRefresh((r) => r + 1);
   };
 
   const columns = [
@@ -112,14 +108,7 @@ export default function CodesPage() {
     <div key={refresh}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>兑换码查询</Title>
-        <Space>
-          <Button icon={<ReloadOutlined />} onClick={() => setRefresh((r) => r + 1)}>刷新</Button>
-          {hasPermission('manage') && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setSupplementOpen(true)}>
-              补发兑换码
-            </Button>
-          )}
-        </Space>
+        <Button icon={<ReloadOutlined />} onClick={() => setRefresh((r) => r + 1)}>刷新</Button>
       </div>
 
       <Card style={{ marginBottom: 16 }}>
@@ -129,36 +118,42 @@ export default function CodesPage() {
             prefix={<SearchOutlined />}
             allowClear
             style={{ width: 200 }}
-            value={filters.code}
-            onChange={(e) => setFilters({ ...filters, code: e.target.value })}
+            value={inputValues.code}
+            onChange={(e) => setInputValues({ ...inputValues, code: e.target.value })}
+            onPressEnter={handleSearch}
           />
           <Input
             placeholder="兑换邮箱"
             allowClear
             style={{ width: 200 }}
-            value={filters.email}
-            onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+            value={inputValues.email}
+            onChange={(e) => setInputValues({ ...inputValues, email: e.target.value })}
+            onPressEnter={handleSearch}
           />
           <Select
             placeholder="所属批次"
             allowClear
             style={{ width: 180 }}
-            value={filters.batchId || undefined}
-            onChange={(v) => setFilters({ ...filters, batchId: v ?? '' })}
+            value={inputValues.batchId || undefined}
+            onChange={(v) => setInputValues({ ...inputValues, batchId: v ?? '' })}
             options={batches.map((b) => ({ label: `${b.id} (${b.remark})`, value: b.id }))}
           />
           <Select
             placeholder="状态"
             allowClear
             style={{ width: 130 }}
-            value={filters.status || undefined}
-            onChange={(v) => setFilters({ ...filters, status: v ?? '' })}
+            value={inputValues.status || undefined}
+            onChange={(v) => setInputValues({ ...inputValues, status: v ?? '' })}
             options={[
               { label: '未使用', value: 'unused' },
               { label: '已使用', value: 'used' },
               { label: '已作废', value: 'voided' },
             ]}
           />
+          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+            查询
+          </Button>
+          <Button onClick={handleReset}>重置</Button>
           <Text type="secondary">共 {filtered.length} 条</Text>
         </Space>
       </Card>
@@ -236,32 +231,6 @@ export default function CodesPage() {
             )}
           </div>
         )}
-      </Modal>
-
-      <Modal
-        title="补发兑换码"
-        open={supplementOpen}
-        onCancel={() => setSupplementOpen(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setSupplementOpen(false)}>取消</Button>,
-          <Button key="create" type="primary" onClick={handleSupplement}>生成</Button>,
-        ]}
-      >
-        <Form form={supplementForm} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item
-            label="备注"
-            name="remark"
-            rules={[{ required: true, message: '请输入备注' }]}
-          >
-            <AntInput.TextArea
-              rows={3}
-              placeholder="例如：用户丢卡，已提供订单号 12345 截图"
-            />
-          </Form.Item>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            将生成一个未使用的兑换码，可直接发给用户。
-          </Text>
-        </Form>
       </Modal>
     </div>
   );
