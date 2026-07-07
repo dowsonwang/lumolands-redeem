@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Settings } from 'lucide-react';
 import EmailInput from '@/components/EmailInput';
 import CodeInput from '@/components/CodeInput';
 import RedeemButton from '@/components/RedeemButton';
@@ -39,6 +41,15 @@ export default function RedeemPage() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:py-14">
+      {/* Dev prototype entry to admin (bottom-left) */}
+      <Link
+        to="/admin/login"
+        className="fixed bottom-4 left-4 z-50 inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-[12px] text-stone-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-white hover:text-stone-700"
+        title="Admin Console (dev prototype)"
+      >
+        <Settings className="h-3.5 w-3.5" />
+        <span>Admin</span>
+      </Link>
       <header className="mb-7 flex flex-col items-center text-center animate-fade-up" style={{ animationDelay: '0ms' }}>
         <div className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           lumolands
