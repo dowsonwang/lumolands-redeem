@@ -120,14 +120,16 @@ export default function BatchesPage() {
 
   const columns = [
     { title: '批次号', dataIndex: 'id', key: 'id', fixed: 'left' as const, width: 160 },
-    { title: '备注', dataIndex: 'remark', key: 'remark', ellipsis: true },
-    { title: '会员时长', key: 'duration', width: 100, render: () => '12 个月' },
+    {
+      title: '备注', dataIndex: 'remark', key: 'remark', ellipsis: true,
+      render: (remark: string) => (
+        <Tooltip title={remark} placement="topLeft">
+          <span style={{ cursor: 'default' }}>{remark}</span>
+        </Tooltip>
+      ),
+    },
     { title: '总数', dataIndex: 'total', key: 'total', width: 80 },
     { title: '已兑换', dataIndex: 'redeemed', key: 'redeemed', width: 90 },
-    {
-      title: '兑换率', dataIndex: 'rate', key: 'rate', width: 90,
-      render: (r: number) => `${(r * 100).toFixed(1)}%`,
-    },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
     { title: '创建人', dataIndex: 'createdBy', key: 'createdBy', width: 100 },
     {
@@ -191,7 +193,7 @@ export default function BatchesPage() {
           dataSource={data}
           columns={columns}
           rowKey="id"
-          scroll={{ x: 1200 }}
+          scroll={{ x: 980 }}
           pagination={{ pageSize: 10 }}
           size="middle"
         />

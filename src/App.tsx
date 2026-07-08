@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import RedeemPage from "@/pages/RedeemPage";
@@ -20,7 +20,8 @@ export default function App() {
             {/* 管理后台 */}
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<BatchesPage />} />
+              <Route index element={<Navigate to="batches" replace />} />
+              <Route path="batches" element={<BatchesPage />} />
               <Route path="codes" element={<CodesPage />} />
             </Route>
           </Routes>

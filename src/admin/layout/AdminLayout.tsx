@@ -65,7 +65,7 @@ export default function AdminLayout() {
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname === '/admin' ? '/admin/batches' : location.pathname]}
+          selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
           style={{ borderRight: 0 }}
