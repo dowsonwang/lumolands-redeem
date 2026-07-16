@@ -3,6 +3,7 @@ import { Layout, Menu, Avatar, Dropdown, Tag, Typography } from 'antd';
 import {
   AppstoreOutlined,
   SearchOutlined,
+  GiftOutlined,
   LogoutOutlined,
   UserOutlined,
   MenuFoldOutlined,
@@ -17,6 +18,7 @@ const { Text } = Typography;
 const menuItems = [
   { key: '/admin/batches', icon: <AppstoreOutlined />, label: '批次管理' },
   { key: '/admin/codes', icon: <SearchOutlined />, label: '兑换码查询' },
+  { key: '/admin/gifts', icon: <GiftOutlined />, label: '卷纸领取' },
 ];
 
 export default function AdminLayout() {

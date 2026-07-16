@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>lumolands 会员兑换码 · 管理后台 PRD</title>
+<style>
+  :root {
+    --ink: #1c1917;
+    --amber: #d97706;
+    --amber-soft: #fef3c7;
+    --stone-50: #faf7f2;
+    --stone-100: #f5f5f4;
+    --stone-200: #e7e5e4;
+    --stone-400: #a8a29e;
+    --stone-500: #78716c;
+    --stone-600: #57534e;
+    --emerald: #059669;
+    --emerald-soft: #d1fae5;
+    --red: #dc2626;
+    --red-soft: #fee2e2;
+    --blue: #2563eb;
+    --blue-soft: #dbeafe;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--ink);
+    background: var(--stone-50);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 48px 32px 96px; }
+  h1 { font-size: 32px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 22px; font-weight: 600; margin: 48px 0 16px; padding-bottom: 10px; border-bottom: 2px solid var(--amber); display: inline-block; }
+  h3 { font-size: 17px; font-weight: 600; margin: 28px 0 12px; color: var(--ink); }
+  h4 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; color: var(--stone-600); }
+  p { margin: 8px 0; color: var(--stone-600); }
+  .meta { color: var(--stone-400); font-size: 13px; margin-bottom: 32px; }
+  .meta span { margin-right: 16px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; background: var(--amber-soft); color: var(--amber); margin-right: 6px; }
+
+  /* 线框 */
+  .wireframe { background: #fff; border: 1px solid var(--stone-200); border-radius: 12px; padding: 24px; margin: 16px 0; box-shadow: 0 4px 16px rgba(28,25,23,0.04); }
+  .wf-label { font-size: 12px; color: var(--stone-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+  /* 后台整体布局线框 */
+  .admin-layout { border: 1px dashed var(--stone-200); border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 180px 1fr; min-height: 280px; }
+  .al-sider { background: #fff; border-right: 1px solid var(--stone-200); padding: 14px 12px; }
+  .al-logo { font-weight: 700; font-size: 14px; text-align: center; padding-bottom: 12px; border-bottom: 1px solid var(--stone-100); }
+  .al-menu-item { padding: 8px 10px; font-size: 12.5px; border-radius: 6px; margin-top: 6px; color: var(--stone-600); }
+  .al-menu-item.active { background: var(--amber-soft); color: var(--amber); font-weight: 500; }
+  .al-header { background: #fff; border-bottom: 1px solid var(--stone-200); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+  .al-user { display: flex; align-items: center; gap: 6px; color: var(--stone-500); }
+  .al-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--stone-200); }
+  .al-role { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: #fef3c7; color: #92400e; }
+  .al-content { padding: 16px; background: var(--stone-50); position: relative; }
+  .al-back { position: absolute; bottom: 10px; left: 10px; font-size: 11px; color: var(--stone-500); border: 1px solid var(--stone-200); background: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 14px; }
+
+  /* 表格线框 */
+  .table-mock { background: #fff; border: 1px solid var(--stone-200); border-radius: 8px; overflow: hidden; font-size: 11.5px; }
+  .tm-row { display: grid; padding: 8px 10px; border-bottom: 1px solid var(--stone-100); align-items: center; }
+  .tm-row:last-child { border-bottom: none; }
+  .tm-head { background: var(--stone-100); font-weight: 600; color: var(--ink); }
+  .tm-cell { padding: 2px 4px; color: var(--stone-600); }
+  .tm-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 10px; }
+  .tag-green { background: var(--emerald-soft); color: #065f46; }
+  .tag-gray { background: var(--stone-100); color: var(--stone-600); }
+  .tag-red { background: var(--red-soft); color: #991b1b; }
+  .tm-btn { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 10px; border: 1px solid var(--stone-200); margin-right: 4px; }
+
+  /* 查询区线框 */
+  .query-mock { background: #fff; border: 1px solid var(--stone-200); border-radius: 8px; padding: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 11px; }
+  .qm-input { border: 1px solid var(--stone-200); border-radius: 4px; padding: 4px 8px; color: var(--stone-400); min-width: 90px; }
+  .qm-btn-primary { background: var(--ink); color: #fff; padding: 4px 12px; border-radius: 4px; }
+  .qm-btn { background: #fff; border: 1px solid var(--stone-200); padding: 4px 12px; border-radius: 4px; color: var(--stone-600); }
+
+  /* 弹窗线框 */
+  .modal-mock { background: #fff; border: 1px solid var(--stone-200); border-radius: 10px; max-width: 380px; margin: 0 auto; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+  .mm-head { padding: 12px 16px; border-bottom: 1px solid var(--stone-100); font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; }
+  .mm-body { padding: 16px; }
+  .mm-field { margin-bottom: 12px; }
+  .mm-label { font-size: 11px; color: var(--stone-500); margin-bottom: 4px; }
+  .mm-input { border: 1px solid var(--stone-200); border-radius: 6px; height: 28px; padding: 0 10px; font-size: 11px; color: var(--stone-400); display: flex; align-items: center; }
+  .mm-input.disabled { background: var(--stone-100); color: var(--stone-500); }
+  .mm-footer { padding: 10px 16px; border-top: 1px solid var(--stone-100); display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* 流程/状态机 */
+  .flow { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 16px 0; }
+  .flow-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .flow-node { background: #fff; border: 1.5px solid var(--stone-200); border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 500; }
+  .flow-node.start { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .flow-node.action { border-color: var(--amber); background: var(--amber-soft); color: #92400e; }
+  .flow-arrow { color: var(--stone-400); font-size: 16px; }
+  .flow-down { color: var(--stone-400); font-size: 16px; }
+
+  .state-machine { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
+  .state { padding: 10px 18px; border-radius: 26px; font-size: 13px; font-weight: 600; border: 2px solid; }
+  .state.inactive { border-color: var(--stone-400); color: var(--stone-600); background: var(--stone-100); }
+  .state.active { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-soft); }
+  .state.voided { border-color: var(--red); color: var(--red); background: var(--red-soft); }
+  .state.unused { border-color: var(--stone-400); color: var(--stone-600); background: var(--stone-100); }
+  .state.used { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
+  .state.terminal { box-shadow: 0 0 0 3px rgba(0,0,0,0.04); }
+  .state-arrow { color: var(--stone-400); font-size: 14px; }
+  .state-arrow-label { font-size: 11px; color: var(--stone-500); text-align: center; }
+
+  /* 表格 */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  th { background: var(--stone-100); text-align: left; padding: 12px 14px; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--stone-200); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--stone-100); color: var(--stone-600); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code, .inline-code { font-family: ui-monospace, "JetBrains Mono", monospace; background: var(--stone-100); padding: 2px 6px; border-radius: 4px; font-size: 12.5px; color: var(--ink); }
+
+  /* 权限对比 */
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  .role-card { border-radius: 10px; padding: 14px; font-size: 13px; }
+  .role-admin { background: var(--amber-soft); border: 1px solid #fcd34d; }
+  .role-service { background: var(--blue-soft); border: 1px solid #93c5fd; }
+  .role-title { font-weight: 600; margin-bottom: 6px; }
+  .role-admin .role-title { color: #92400e; }
+  .role-service .role-title { color: #1e40af; }
+  .role-card ul { margin: 4px 0 0; padding-left: 18px; color: var(--stone-600); }
+
+  .note { background: var(--amber-soft); border-left: 3px solid var(--amber); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 13.5px; color: #92400e; }
+  .note b { color: #78350f; }
+
+  ul, ol { color: var(--stone-600); padding-left: 22px; }
+  li { margin: 4px 0; }
+  .section-intro { color: var(--stone-500); font-size: 14px; margin-bottom: 16px; }
+  hr { border: none; border-top: 1px solid var(--stone-200); margin: 40px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>lumolands 会员兑换码 · 管理后台 PRD</h1>
+  <div class="meta">
+    <span class="badge">v1.0</span>
+    <span>对象：开发 / 测试</span>
+    <span>UI 语言：中文</span>
+  </div>
+
+  <hr>
+
+  <!-- 1. 概述 -->
+  <h2>1. 产品概述</h2>
+
+  <h3>1.1 背景与目的</h3>
+  <p>为运营/客服团队提供兑换码全生命周期管理工具，覆盖：批次生成 → 启用 → 兑换码查询 → 作废/停用 → 数据导出。</p>
+  <p>本后台与用户兑换前台共享同一套兑换码数据，前台兑换的码在后台立即可查。</p>
+
+  <h3>1.2 用户角色</h3>
+  <div class="role-grid">
+    <div class="role-card role-admin">
+      <div class="role-title">管理员（admin）</div>
+      <ul>
+        <li>批次管理：生成 / 启用 / 停用 / 作废 / 导出</li>
+        <li>兑换码查询</li>
+        <li>单个作废</li>
+      </ul>
+    </div>
+    <div class="role-card role-service">
+      <div class="role-title">客服（service）</div>
+      <ul>
+        <li>批次列表：只读</li>
+        <li>兑换码列表：只读</li>
+        <li>无任何操作按钮</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>1.3 访问入口</h3>
+  <ul>
+    <li>登录页：<code>/admin/login</code></li>
+    <li>后台首页：<code>/admin</code>（自动重定向到批次管理）</li>
+    <li>左下角浮动按钮"← 返回兑换页"可回到前台</li>
+  </ul>
+
+  <!-- 2. 登录鉴权 -->
+  <h2>2. 登录与鉴权</h2>
+
+  <h3>2.1 登录页</h3>
+  <div class="wireframe">
+    <div class="wf-label">登录页线框</div>
+    <div class="modal-mock">
+      <div class="mm-head"><span>lumolands · 兑换码管理后台</span></div>
+      <div class="mm-body">
+        <div class="mm-field">
+          <div class="mm-label">用户名</div>
+          <div class="mm-input">请输入用户名</div>
+        </div>
+        <div class="mm-field">
+          <div class="mm-label">密码</div>
+          <div class="mm-input">请输入密码</div>
+        </div>
+        <div class="mm-footer">
+          <div class="qm-btn-primary" style="font-size:11px;">登录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ul>
+    <li>居中卡片布局，品牌区显示 <code>lumolands</code> + 副标题 <code>兑换码管理后台</code></li>
+    <li>字段：用户名、密码，均为必填</li>
+    <li>提交后约 500ms 响应</li>
+  </ul>
+
+  <h3>2.2 异常处理</h3>
+  <table>
+    <thead><tr><th style="width:42%;">场景</th><th>处理</th></tr></thead>
+    <tbody>
+      <tr><td>用户名或密码错误</td><td>顶部红色 Alert 提示 <code>用户名或密码错误</code></td></tr>
+      <tr><td>同一用户名连续失败 5 次</td><td>账号锁定 15 分钟，提示 <code>账号已锁定，请 X 分钟后再试</code></td></tr>
+      <tr><td>登录成功</td><td>跳转到来源页或 <code>/admin</code></td></tr>
+      <tr><td>已登录用户访问登录页</td><td>自动跳转后台</td></tr>
+      <tr><td>未登录访问后台任意页</td><td>跳转登录页，登录后回到原页面</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 会话</h3>
+  <ul>
+    <li>会话仅维持当前浏览器标签页（关闭标签即失效）</li>
+    <li>退出登录：右上角头像下拉 → <code>退出登录</code></li>
+  </ul>
+
+  <!-- 3. 整体布局 -->
+  <h2>3. 整体布局</h2>
+
+  <div class="wireframe">
+    <div class="wf-label">后台整体布局</div>
+    <div class="admin-layout">
+      <div class="al-sider">
+        <div class="al-logo">lumolands</div>
+        <div class="al-menu-item active">📦 批次管理</div>
+        <div class="al-menu-item">🔍 兑换码查询</div>
+      </div>
+      <div style="display:flex; flex-direction:column;">
+        <div class="al-header">
+          <span>☰ 折叠</span>
+          <div class="al-user">
+            <div class="al-avatar"></div>
+            <span>管理员</span>
+            <span class="al-role">admin</span>
+          </div>
+        </div>
+        <div class="al-content">
+          <div style="font-size:13px; font-weight:600; margin-bottom:10px;">批次管理</div>
+          <div style="font-size:11px; color: var(--stone-400);">（页面主体内容区，白底圆角卡片）</div>
+          <div class="al-back">← 返回兑换页</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ul>
+    <li>左侧 Sider：品牌 logo + 菜单（批次管理、兑换码查询），可折叠</li>
+    <li>顶部 Header：折叠按钮 + 右上角用户头像/昵称/角色标签</li>
+    <li>主体 Content：白底圆角卡片</li>
+  </ul>
+
+  <!-- 4. 批次管理 -->
+  <h2>4. 批次管理</h2>
+  <p class="section-intro">路由：<code>/admin/batches</code>（后台首页）</p>
+
+  <h3>4.1 列表展示</h3>
+
+  <div class="wireframe">
+    <div class="wf-label">批次列表线框</div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:12px;">
+      <span style="font-weight:600;">批次管理</span>
+      <span><span class="qm-btn" style="font-size:10px;">刷新</span> <span class="qm-btn-primary" style="font-size:10px;">+ 新建批次</span></span>
+    </div>
+    <div class="table-mock">
+      <div class="tm-row tm-head" style="grid-template-columns: 1.2fr 1.5fr 0.5fr 0.6fr 0.7fr 0.8fr 1fr 1.3fr;">
+        <div>批次号</div><div>备注</div><div>总数</div><div>已兑换</div><div>状态</div><div>创建人</div><div>创建时间</div><div>操作</div>
+      </div>
+      <div class="tm-row" style="grid-template-columns: 1.2fr 1.5fr 0.5fr 0.6fr 0.7fr 0.8fr 1fr 1.3fr;">
+        <div class="tm-cell">B20260707001</div>
+        <div class="tm-cell" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">种子批次·测试用</div>
+        <div class="tm-cell">3</div>
+        <div class="tm-cell">1</div>
+        <div class="tm-cell"><span class="tm-tag tag-green">已启用</span></div>
+        <div class="tm-cell">admin</div>
+        <div class="tm-cell">2026-07-07</div>
+        <div class="tm-cell"><span class="tm-btn">导出</span><span class="tm-btn">停用</span><span class="tm-btn">作废</span></div>
+      </div>
+      <div class="tm-row" style="grid-template-columns: 1.2fr 1.5fr 0.5fr 0.6fr 0.7fr 0.8fr 1fr 1.3fr;">
+        <div class="tm-cell">B20260708001</div>
+        <div class="tm-cell" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">2026-07 批次，印刷订单 PO-888...</div>
+        <div class="tm-cell">1000</div>
+        <div class="tm-cell">0</div>
+        <div class="tm-cell"><span class="tm-tag tag-gray">未启用</span></div>
+        <div class="tm-cell">admin</div>
+        <div class="tm-cell">2026-07-08</div>
+        <div class="tm-cell"><span class="tm-btn">导出</span><span class="tm-btn">启用</span><span class="tm-btn">作废</span></div>
+      </div>
+    </div>
+    <div style="text-align:right; margin-top:8px; font-size:11px; color: var(--stone-400);">分页：每页 10 条</div>
+  </div>
+
+  <h4>列定义</h4>
+  <table>
+    <thead><tr><th style="width:18%;">列</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>批次号</td><td>系统自动生成，格式 <code>B + YYYYMMDD + 3位序号</code></td></tr>
+      <tr><td>备注</td><td>文本展示，超长省略，<strong>hover 浮窗显示完整内容</strong></td></tr>
+      <tr><td>总数</td><td>该批次下兑换码总数</td></tr>
+      <tr><td>已兑换</td><td>该批次下已使用的码数</td></tr>
+      <tr><td>状态</td><td>未启用（灰）/ 已启用（绿）/ 已作废（红）</td></tr>
+      <tr><td>创建人</td><td>创建批次的账号</td></tr>
+      <tr><td>创建时间</td><td>格式化时间</td></tr>
+      <tr><td>操作</td><td>见 4.3</td></tr>
+    </tbody>
+  </table>
+
+  <h4>交互</h4>
+  <ul>
+    <li>分页：每页 10 条</li>
+    <li>顶部右侧：<code>刷新</code> 按钮（管理员还显示 <code>新建批次</code> 按钮）</li>
+    <li>客服角色：操作列显示 <code>仅查看</code></li>
+  </ul>
+
+  <h3>4.2 新建批次</h3>
+  <p>入口：管理员可见的 <code>新建批次</code> 按钮</p>
+
+  <div class="wireframe">
+    <div class="wf-label">新建批次弹窗线框</div>
+    <div class="modal-mock">
+      <div class="mm-head"><span>新建批次</span><span style="color:var(--stone-400);">×</span></div>
+      <div class="mm-body">
+        <div class="mm-field">
+          <div class="mm-label">会员时长</div>
+          <div class="mm-input disabled">12 个月</div>
+        </div>
+        <div class="mm-field">
+          <div class="mm-label">数量（1 - 50000）</div>
+          <div class="mm-input">例如 1000</div>
+        </div>
+        <div class="mm-field">
+          <div class="mm-label">备注 *</div>
+          <div class="mm-input" style="height:48px;">例如：2026-07 批次，印刷订单 PO-888，发往欧洲仓</div>
+        </div>
+        <div style="font-size:10px; color: var(--stone-400); margin-top:8px;">注意：批次创建后默认为未启用状态，码无法兑换。需手动启用后码才生效。</div>
+      </div>
+      <div class="mm-footer">
+        <div class="qm-btn" style="font-size:11px;">取消</div>
+        <div class="qm-btn-primary" style="font-size:11px;">创建并生成兑换码</div>
+      </div>
+    </div>
+  </div>
+
+  <h4>提交流程</h4>
+  <div class="flow">
+    <div class="flow-node start">点击"创建并生成兑换码"</div>
+    <div class="flow-down">↓</div>
+    <div class="flow-node">校验数量范围 + 备注非空</div>
+    <div class="flow-down">↓</div>
+    <div class="flow-node action">生成批次 + 批量生成 N 个不重复码</div>
+    <div class="flow-down">↓</div>
+    <div class="flow-node" style="border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald);">成功提示 + 关闭弹窗 + 列表刷新</div>
+  </div>
+
+  <h4>异常</h4>
+  <table>
+    <thead><tr><th style="width:42%;">场景</th><th>处理</th></tr></thead>
+    <tbody>
+      <tr><td>数量为空或超范围</td><td>表单校验红字提示</td></tr>
+      <tr><td>备注为空</td><td>表单校验红字提示</td></tr>
+      <tr><td>生成去重失败（理论极低概率）</td><td>抛错，提示重试</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 批次操作</h3>
+  <p>根据批次状态，操作列显示不同按钮：</p>
+  <table>
+    <thead><tr><th style="width:20%;">状态</th><th>可用操作</th></tr></thead>
+    <tbody>
+      <tr><td>未启用</td><td>导出 CSV / 启用 / 作废</td></tr>
+      <tr><td>已启用</td><td>导出 CSV / 停用 / 作废</td></tr>
+      <tr><td>已作废</td><td>导出 CSV</td></tr>
+    </tbody>
+  </table>
+
+  <h4>4.3.1 启用批次</h4>
+  <ul>
+    <li>Popconfirm 二次确认：<code>确认启用该批次？启用后码即可兑换。</code></li>
+    <li>确认后状态变为 <code>已启用</code>，该批次下所有 <code>unused</code> 码可被前台兑换</li>
+    <li>Toast：<code>批次 BX 已启用</code></li>
+  </ul>
+
+  <h4>4.3.2 停用批次</h4>
+  <ul>
+    <li>Popconfirm 二次确认：<code>确认停用该批次？停用后码将无法兑换。</code></li>
+    <li>确认后状态变为 <code>未启用</code>，该批次下码不可兑换（已兑换的不受影响）</li>
+    <li>Toast：<code>批次 BX 已停用</code></li>
+  </ul>
+
+  <h4>4.3.3 作废批次</h4>
+  <ul>
+    <li>Popconfirm 二次确认 + 风险说明：
+      <ul>
+        <li>标题：<code>确认作废该批次？</code></li>
+        <li>描述：<code>所有未使用的码将被作废，已兑换的码不受影响。此操作不可撤销。</code></li>
+        <li>确认按钮红色危险样式</li>
+      </ul>
+    </li>
+    <li>确认后：批次状态变为 <code>已作废</code>，该批次下所有 <code>unused</code> 码状态变为 <code>voided</code>；已 <code>used</code> 的码不受影响</li>
+    <li>Toast：<code>批次 BX 已作废</code></li>
+  </ul>
+
+  <h4>4.3.4 导出 CSV</h4>
+  <ul>
+    <li>点击下载图标，导出该批次下所有兑换码</li>
+    <li>CSV 文件名：<code>{批次号}_codes.csv</code></li>
+    <li>CSV 表头：<code>Code,Status,RedeemedAt,RedeemedEmail</code></li>
+    <li><strong>兑换码以 4-4-4-4 分隔格式展示</strong>（如 <code>ABCD-EFGH-JKMN-PQRS</code>），方便人工阅读</li>
+    <li>文件带 UTF-8 BOM 头，确保 Excel 正确识别中文</li>
+    <li>Toast：<code>已导出 N 个兑换码</code></li>
+  </ul>
+
+  <!-- 5. 兑换码查询 -->
+  <h2>5. 兑换码查询</h2>
+  <p class="section-intro">路由：<code>/admin/codes</code></p>
+
+  <h3>5.1 查询条件</h3>
+
+  <div class="wireframe">
+    <div class="wf-label">查询区线框</div>
+    <div class="query-mock">
+      <div class="qm-input">兑换码（模糊）</div>
+      <div class="qm-input">兑换邮箱</div>
+      <div class="qm-input">所属批次 ▾</div>
+      <div class="qm-input">状态 ▾</div>
+      <div class="qm-btn-primary">查询</div>
+      <div class="qm-btn">重置</div>
+      <span style="color: var(--stone-400);">共 N 条</span>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:18%;">条件</th><th style="width:18%;">控件</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>兑换码</td><td>文本输入</td><td>支持模糊匹配，大写</td></tr>
+      <tr><td>兑换邮箱</td><td>文本输入</td><td>模糊匹配，大小写不敏感</td></tr>
+      <tr><td>所属批次</td><td>下拉选择</td><td>选项格式 <code>批次号 (备注)</code>，可清空</td></tr>
+      <tr><td>状态</td><td>下拉选择</td><td>未使用 / 已使用 / 已作废，可清空</td></tr>
+    </tbody>
+  </table>
+
+  <h4>交互</h4>
+  <ul>
+    <li>输入框支持回车触发查询</li>
+    <li><code>查询</code>：将输入框当前值应用为过滤条件</li>
+    <li><code>重置</code>：清空所有输入框 + 过滤条件</li>
+    <li>查询区右侧显示 <code>共 N 条</code> 结果计数</li>
+    <li><code>刷新</code> 按钮：重新拉取数据</li>
+  </ul>
+
+  <h3>5.2 列表展示</h3>
+
+  <div class="wireframe">
+    <div class="wf-label">兑换码列表线框</div>
+    <div class="table-mock">
+      <div class="tm-row tm-head" style="grid-template-columns: 1.4fr 1fr 0.7fr 1.2fr 1fr 0.9fr;">
+        <div>兑换码</div><div>所属批次</div><div>状态</div><div>兑换邮箱</div><div>兑换时间</div><div>操作</div>
+      </div>
+      <div class="tm-row" style="grid-template-columns: 1.4fr 1fr 0.7fr 1.2fr 1fr 0.9fr;">
+        <div class="tm-cell" style="font-family:ui-monospace,monospace;">REME-DYUS-EDAA-AAAA</div>
+        <div class="tm-cell">B20260707001</div>
+        <div class="tm-cell"><span class="tm-tag tag-green">已使用</span></div>
+        <div class="tm-cell">user@gmial.com</div>
+        <div class="tm-cell">2026-07-07</div>
+        <div class="tm-cell"><span class="tm-btn">详情</span></div>
+      </div>
+      <div class="tm-row" style="grid-template-columns: 1.4fr 1fr 0.7fr 1.2fr 1fr 0.9fr;">
+        <div class="tm-cell" style="font-family:ui-monospace,monospace;">REME-DYNE-WAAA-AAAA</div>
+        <div class="tm-cell">B20260707001</div>
+        <div class="tm-cell"><span class="tm-tag tag-gray">未使用</span></div>
+        <div class="tm-cell" style="color:var(--stone-400);">-</div>
+        <div class="tm-cell" style="color:var(--stone-400);">-</div>
+        <div class="tm-cell"><span class="tm-btn">详情</span><span class="tm-btn">作废</span></div>
+      </div>
+      <div class="tm-row" style="grid-template-columns: 1.4fr 1fr 0.7fr 1.2fr 1fr 0.9fr;">
+        <div class="tm-cell" style="font-family:ui-monospace,monospace;">REME-DYVD-AAAA-AAAA</div>
+        <div class="tm-cell">B20260707001</div>
+        <div class="tm-cell"><span class="tm-tag tag-red">已作废</span></div>
+        <div class="tm-cell" style="color:var(--stone-400);">-</div>
+        <div class="tm-cell" style="color:var(--stone-400);">-</div>
+        <div class="tm-cell"><span class="tm-btn">详情</span></div>
+      </div>
+    </div>
+    <div style="text-align:right; margin-top:8px; font-size:11px; color: var(--stone-400);">分页：每页 10 条 · 横向滚动（固定兑换码列在左、操作列在右）</div>
+  </div>
+
+  <h4>列定义</h4>
+  <table>
+    <thead><tr><th style="width:18%;">列</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>兑换码</td><td>4-4-4-4 分隔格式，等宽字体</td></tr>
+      <tr><td>所属批次</td><td>批次号</td></tr>
+      <tr><td>状态</td><td>未使用（灰）/ 已使用（绿）/ 已作废（红）</td></tr>
+      <tr><td>兑换邮箱</td><td>未兑换显示 <code>-</code></td></tr>
+      <tr><td>兑换时间</td><td>未兑换显示 <code>-</code></td></tr>
+      <tr><td>操作</td><td>详情 / 作废</td></tr>
+    </tbody>
+  </table>
+
+  <h4>交互</h4>
+  <ul>
+    <li>分页：每页 10 条</li>
+    <li>横向滚动支持（固定兑换码列在左、操作列在右）</li>
+    <li>客服角色：操作列不显示作废按钮</li>
+  </ul>
+
+  <h3>5.3 兑换码操作</h3>
+
+  <h4>5.3.1 查看详情</h4>
+  <div class="wireframe">
+    <div class="wf-label">详情弹窗线框</div>
+    <div class="modal-mock" style="max-width:440px;">
+      <div class="mm-head"><span>兑换码详情</span><span style="color:var(--stone-400);">×</span></div>
+      <div class="mm-body">
+        <div style="display:grid; grid-template-columns: 90px 1fr; gap:6px 12px; font-size:11.5px;">
+          <div style="color:var(--stone-500);">兑换码</div><div style="font-family:ui-monospace,monospace;">REME-DYUS-EDAA-AAAA</div>
+          <div style="color:var(--stone-500);">状态</div><div><span class="tm-tag tag-green">已使用</span></div>
+          <div style="color:var(--stone-500);">所属批次</div><div>B20260707001</div>
+          <div style="color:var(--stone-500);">创建时间</div><div>2026-07-07 10:00</div>
+          <div style="color:var(--stone-500);">兑换邮箱</div><div>user@gmial.com</div>
+          <div style="color:var(--stone-500);">兑换时间</div><div>2026-07-07 12:00</div>
+          <div style="color:var(--stone-500);">兑换 IP</div><div>203.0.113.42</div>
+        </div>
+        <div style="margin-top:16px; font-weight:600; font-size:12px;">兑换尝试记录</div>
+        <div style="border-left:2px solid var(--emerald); padding-left:12px; margin-top:8px; font-size:11px;">
+          <div style="color:var(--emerald); font-weight:600;">● 成功</div>
+          <div style="color:var(--stone-500);">2026-07-07 12:00 · 邮箱：user@gmial.com · IP：203.0.113.42</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ul>
+    <li>点击 <code>详情</code> 弹出 Modal</li>
+    <li>展示信息：兑换码、状态、所属批次、创建时间、兑换邮箱、兑换时间、兑换 IP</li>
+    <li>若为补发码，额外展示补发备注</li>
+    <li>下方展示 <code>兑换尝试记录</code> 时间线：
+      <ul>
+        <li>倒序展示该码的所有兑换尝试（含成功/失败）</li>
+        <li>每条显示：结果（成功绿/失败红）、时间、邮箱、IP</li>
+        <li>无记录时显示 <code>暂无兑换尝试记录</code></li>
+      </ul>
+    </li>
+  </ul>
+
+  <h4>5.3.2 单个作废</h4>
+  <ul>
+    <li>仅 <code>unused</code> 状态的码可作废</li>
+    <li>仅管理员可见</li>
+    <li>Popconfirm 二次确认：<code>确认作废该码？</code></li>
+    <li>确认后码状态变为 <code>voided</code></li>
+    <li>Toast：<code>兑换码 XXXX-XXXX-XXXX-XXXX 已作废</code></li>
+  </ul>
+
+  <h4>异常</h4>
+  <table>
+    <thead><tr><th style="width:42%;">场景</th><th>处理</th></tr></thead>
+    <tbody>
+      <tr><td>码已被使用，不可作废</td><td>Toast 错误：<code>只有未使用的码才能作废</code></td></tr>
+      <tr><td>码已被作废</td><td>操作按钮不显示</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 6. 生成规则 -->
+  <h2>6. 兑换码生成规则（供参考）</h2>
+  <div class="note">
+    <b>注：</b>以下为产品层规则，具体实现由开发决定。
+  </div>
+  <ul>
+    <li>长度：16 位</li>
+    <li>字符集：大写字母 + 数字，剔除易混淆字符 <code>0 O 1 I L</code>（共 31 个合法字符）</li>
+    <li>唯一性：同一批次内不重复，跨批次也不重复（与历史所有码去重）</li>
+    <li>展示格式：4-4-4-4 分隔（如 <code>ABCD-EFGH-JKMN-PQRS</code>）</li>
+    <li>输入格式：前台用户可不输入分隔符，系统自动忽略</li>
+  </ul>
+
+  <!-- 7. 异常处理 -->
+  <h2>7. 异常情况处理</h2>
+
+  <h3>7.1 权限异常</h3>
+  <table>
+    <thead><tr><th style="width:42%;">场景</th><th>处理</th></tr></thead>
+    <tbody>
+      <tr><td>客服尝试访问需管理权限的操作</td><td>操作按钮不渲染（不是点击后报错）</td></tr>
+      <tr><td>会话过期</td><td>跳转登录页</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 数据异常</h3>
+  <table>
+    <thead><tr><th style="width:42%;">场景</th><th>处理</th></tr></thead>
+    <tbody>
+      <tr><td>列表为空</td><td>表格显示空状态</td></tr>
+      <tr><td>查询无结果</td><td>表格显示空状态</td></tr>
+      <tr><td>批次下无码（理论不应发生）</td><td>导出 CSV 仍可下载，文件仅含表头</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 操作冲突</h3>
+  <table>
+    <thead><tr><th style="width:42%;">场景</th><th>处理</th></tr></thead>
+    <tbody>
+      <tr><td>两个管理员同时操作同一批次</td><td>以最后写入为准，操作后刷新可见最新状态</td></tr>
+      <tr><td>作废批次时部分码刚被前台兑换</td><td>已使用的码不受影响，仅未使用的码被作废</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 8. 状态机 -->
+  <h2>8. 状态机</h2>
+
+  <h3>8.1 批次状态</h3>
+  <div class="wireframe">
+    <div class="wf-label">批次状态流转</div>
+    <div class="state-machine">
+      <div class="state inactive">未启用</div>
+      <div><div class="state-arrow">→</div><div class="state-arrow-label">启用</div></div>
+      <div class="state active">已启用</div>
+      <div><div class="state-arrow">→</div><div class="state-arrow-label">停用</div></div>
+      <div class="state inactive">未启用</div>
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <div style="display:inline-flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <div class="state inactive">未启用</div>
+        <div><div class="state-arrow">→</div><div class="state-arrow-label">作废</div></div>
+        <div class="state voided terminal">已作废（终态）</div>
+        <div style="color:var(--stone-400); margin:0 8px;">/</div>
+        <div class="state active">已启用</div>
+        <div><div class="state-arrow">→</div><div class="state-arrow-label">作废</div></div>
+        <div class="state voided terminal">已作废（终态）</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>8.2 兑换码状态</h3>
+  <div class="wireframe">
+    <div class="wf-label">兑换码状态流转</div>
+    <div class="state-machine">
+      <div class="state unused">unused</div>
+      <div><div class="state-arrow">→</div><div class="state-arrow-label">前台兑换</div></div>
+      <div class="state used terminal">used（终态）</div>
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <div style="display:inline-flex; align-items:center; gap:12px;">
+        <div class="state unused">unused</div>
+        <div><div class="state-arrow">→</div><div class="state-arrow-label">作废</div></div>
+        <div class="state voided terminal">voided（终态）</div>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    <b>注：</b><code>used</code> 和 <code>voided</code> 均为终态，不可逆。
+  </div>
+
+</div>
+</body>
+</html>

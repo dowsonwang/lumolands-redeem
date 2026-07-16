@@ -1,10 +1,10 @@
 // localStorage 持久化数据库层
 // 所有数据存在 localStorage，刷新不丢失。提供同步读写 + 订阅。
 
-import type { AdminUser, Batch, Code, RedemptionLog, AdminLog } from './types';
+import type { AdminUser, Batch, Code, RedemptionLog, AdminLog, GiftOrder } from './types';
 import { generateCodes } from './codeGenerator';
 
-const DB_KEY = 'lumolands_redeem_db_v2';
+const DB_KEY = 'lumolands_redeem_db_v3';
 
 interface DBShape {
   users: AdminUser[];
@@ -12,6 +12,7 @@ interface DBShape {
   codes: Code[];
   redemptionLogs: RedemptionLog[];
   adminLogs: AdminLog[];
+  giftOrders: GiftOrder[];
   // 登录失败锁定记录
   loginLocks: Record<string, { failCount: number; lockedUntil: number | null }>;
 }
@@ -81,12 +82,16 @@ function seedDB(): DBShape {
     },
   ];
 
+  // 卷纸领取 mock 数据
+  const giftOrders: GiftOrder[] = seedGiftOrders();
+
   return {
     users,
     batches: [batch1],
     codes,
     redemptionLogs,
     adminLogs: [],
+    giftOrders,
     loginLocks: {},
   };
 }
@@ -99,7 +104,13 @@ function load(): DBShape {
   try {
     const raw = localStorage.getItem(DB_KEY);
     if (raw) {
-      db = JSON.parse(raw) as DBShape;
+      const parsed = JSON.parse(raw) as DBShape;
+      // 迁移：旧数据缺少 giftOrders 字段时补空数组
+      if (!parsed.giftOrders) {
+        parsed.giftOrders = [];
+      }
+      db = parsed;
+      persist();
       return db;
     }
   } catch {
@@ -381,6 +392,142 @@ export const appMemberDB = {
   // 回收指定邮箱的某次兑换会员
   revoke(email: string, source: string): void {
     console.log(`[Mock App API] Revoke membership from ${email}, source: ${source}`);
+  },
+};
+
+// ============ 卷纸领取订单 ============
+// 种子数据（用于重置）
+function seedGiftOrders(): GiftOrder[] {
+  return [
+    {
+      id: 'G20260716001',
+      email: 'user@gmial.com',
+      address: '123 Market St, Apt 5B, San Francisco, CA 94105',
+      phone: '+1 (415) 555-0138',
+      status: 'pending',
+      shippedAt: null,
+      createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+    },
+    {
+      id: 'G20260716002',
+      email: 'john.doe@example.com',
+      address: '456 Oak Avenue, Los Angeles, CA 90001',
+      phone: '+1 (213) 555-0246',
+      status: 'pending',
+      shippedAt: null,
+      createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+    },
+    {
+      id: 'G20260716003',
+      email: 'maria.garcia@gmail.com',
+      address: '789 Elm Street, Apt 12C, Chicago, IL 60601',
+      phone: '+1 (312) 555-0357',
+      status: 'pending',
+      shippedAt: null,
+      createdAt: new Date(Date.now() - 8 * 3600 * 1000).toISOString(),
+    },
+    {
+      id: 'G20260716004',
+      email: 'abcd1234@privaterelay.appleid.com',
+      address: '321 Maple Drive, Seattle, WA 98101',
+      phone: '+1 (206) 555-0482',
+      status: 'pending',
+      shippedAt: null,
+      createdAt: new Date(Date.now() - 14 * 3600 * 1000).toISOString(),
+    },
+    {
+      id: 'G20260716005',
+      email: 'david.chen@outlook.com',
+      address: '567 Birch Lane, Austin, TX 78701',
+      phone: '+1 (512) 555-0596',
+      status: 'pending',
+      shippedAt: null,
+      createdAt: new Date(Date.now() - 20 * 3600 * 1000).toISOString(),
+    },
+    {
+      id: 'G20260716006',
+      email: 'emma.wilson@yahoo.com',
+      address: '890 Cedar Court, Denver, CO 80201',
+      phone: '+1 (303) 555-0673',
+      status: 'pending',
+      shippedAt: null,
+      createdAt: new Date(Date.now() - 28 * 3600 * 1000).toISOString(),
+    },
+    {
+      id: 'G20260715001',
+      email: 'alice@privaterelay.appleid.com',
+      address: '789 Pine Road, New York, NY 10001',
+      phone: '+1 (917) 555-0391',
+      status: 'shipped',
+      shippedAt: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
+    },
+    {
+      id: 'G20260714001',
+      email: 'robert.kim@hotmail.com',
+      address: '234 Spruce Boulevard, Miami, FL 33101',
+      phone: '+1 (305) 555-0814',
+      status: 'shipped',
+      shippedAt: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
+    },
+  ];
+}
+
+export const giftOrderDB = {
+  list(): GiftOrder[] {
+    return load().giftOrders;
+  },
+  get(id: string): GiftOrder | undefined {
+    return load().giftOrders.find((o) => o.id === id);
+  },
+  // 按条件查询
+  query(opts: {
+    email?: string;
+    phone?: string;
+    status?: GiftOrder['status'];
+  }): GiftOrder[] {
+    const data = load();
+    return data.giftOrders.filter((o) => {
+      if (opts.email && !o.email.toLowerCase().includes(opts.email.toLowerCase())) return false;
+      if (opts.phone && !o.phone.includes(opts.phone)) return false;
+      if (opts.status && o.status !== opts.status) return false;
+      return true;
+    });
+  },
+  // 标记为已发货
+  ship(id: string): boolean {
+    const data = load();
+    const order = data.giftOrders.find((o) => o.id === id);
+    if (!order || order.status !== 'pending') return false;
+    order.status = 'shipped';
+    order.shippedAt = new Date().toISOString();
+    commit();
+    return true;
+  },
+  // App 端创建订单（前台接口）
+  create(input: { email: string; address: string; phone: string }): GiftOrder {
+    const data = load();
+    const now = new Date();
+    const id = `G${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(data.giftOrders.length + 1).padStart(3, '0')}`;
+    const order: GiftOrder = {
+      id,
+      email: input.email.trim().toLowerCase(),
+      address: input.address.trim(),
+      phone: input.phone.trim(),
+      status: 'pending',
+      shippedAt: null,
+      createdAt: now.toISOString(),
+    };
+    data.giftOrders.unshift(order);
+    commit();
+    return order;
+  },
+  // 重置卷纸订单演示数据（不影响批次/兑换码等其他数据）
+  resetDemo(): void {
+    const data = load();
+    data.giftOrders = seedGiftOrders();
+    commit();
   },
 };
 

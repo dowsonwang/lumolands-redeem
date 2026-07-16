@@ -92,6 +92,22 @@ export interface AdminLog {
   createdAt: string;
 }
 
+// 卷纸领取订单状态
+export type GiftOrderStatus = 'pending' | 'shipped';
+// pending: 待发货
+// shipped: 已发货
+
+// 卷纸领取订单
+export interface GiftOrder {
+  id: string;
+  email: string;
+  address: string;
+  phone: string;
+  status: GiftOrderStatus;
+  shippedAt: string | null;
+  createdAt: string;
+}
+
 // 看板统计
 export interface DashboardStats {
   totalCodes: number;

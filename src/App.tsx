@@ -7,6 +7,7 @@ import AdminLayout from "@/admin/layout/AdminLayout";
 import LoginPage from "@/admin/pages/LoginPage";
 import BatchesPage from "@/admin/pages/BatchesPage";
 import CodesPage from "@/admin/pages/CodesPage";
+import GiftOrdersPage from "@/admin/pages/GiftOrdersPage";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
               <Route index element={<Navigate to="batches" replace />} />
               <Route path="batches" element={<BatchesPage />} />
               <Route path="codes" element={<CodesPage />} />
+              <Route path="gifts" element={<GiftOrdersPage />} />
             </Route>
           </Routes>
         </Router>
